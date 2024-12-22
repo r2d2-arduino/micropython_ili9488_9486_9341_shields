@@ -19,21 +19,8 @@ class ResistiveTouchScreen:
     def __init__(self, yu_pin, xl_pin, yd_pin, xr_pin, rd_pin, width, height):
         
         # min, max, direction
-        #2.4 9341
-        #self.X_CALIB = [534, 3693, 1]
-        #self.Y_CALIB = [557, 3888, 0]       
-        
-        #2.8 9341
-        #self.X_CALIB = [265, 3445, 3]
-        #self.Y_CALIB = [343, 3639, 0]     
-        
-        #3.5 9486
-        self.X_CALIB = [300, 3837, 2]
-        self.Y_CALIB = [487, 3671, 1]
-        
-        #3.5 9488
-        #self.X_CALIB = [374, 3900, 0]
-        #self.Y_CALIB = [505, 3739, 1]       
+        self.X_CALIB = [374, 3900, 0]
+        self.Y_CALIB = [405, 3739, 1]       
         
         self.auto_calibration = 0 # Allow to auto-calibrate        
         
