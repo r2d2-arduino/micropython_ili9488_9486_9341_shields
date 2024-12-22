@@ -19,6 +19,9 @@ Therefore, it is proposed to connect with wires: 19 -> 15, 20 -> 16, 21 -> 9, 46
 
 ![Photo of back side of Esp32-D1R32](/../main/photos/esp32-s3-uno-back.png)
 
+## Preparing for other boards:
+There is no need to change anything on the board. Since you can select any pins. The only thing that is recommended: check the operation of the pins in `ili9xxx_pin_checker.py`
+
 ## Pin restrictions:
 
 For Esp32, Raspberry Pi Pico, Esp32-S3: Only pins between 1-31 can be used.
@@ -42,11 +45,13 @@ After that, a set of new calibration parameters will be displayed, which should 
 * **ILI9341_example/** - a set of examples for using the library ILI9341.py
 * **ILI9486_example/** - a set of examples for using the library ILI9486.py
 * **ILI9488_example/** - a set of examples for using the library ILI9488.py
-* **utils/** - a set of utils
-font_to_py.py
-pip install freetype-py
-font_to_py.py -x LibreBodoni-Bold.ttf 24 LibreBodoni24.py
-
+* **for_examples/** - files related to examples.
+* **mpy_6.3/** - pre-compressed versions of libraries. Use them if you don't have enough RAM.
+* **utils/** - a set of utils:
+  - *utils/font_to_py.py* - Used to convert ttf font to py script. First of all, you need to install: `pip install freetype-py`. Then run a command similar to the example:
+`python font_to_py.py -x LibreBodoni-Bold.ttf 24 LibreBodoni24.py`. More details: https://github.com/peterhinch/micropython-font-to-py
+  - *utils/img2rgb565.py* - Used to convert BMP-image to RAW RGB565 format. Usage: `python img2rgb565.py <your_image>`
+  
 ## Minimum code to run (ILI9488):
 ```python
 from ili9488 import ILI9488
@@ -95,9 +100,7 @@ tft.fill_screen(0xF800) # Fill the screen with red color
 
 ## Text functions:
 
-* **set_font (font):** Set font for text. Converted font is used. 
-Conversion example: utils/font_to_py.py -x FONT_NAME.ttf 16 NEW_FONT_NAME_16.py
-More details: https://github.com/peterhinch/micropython-font-to-py
+* **set_font (font):** Set font for text. Converted font is used. See *utils/font_to_py.py*.
 * **draw_text (text, x, y, color):** Draw text on display.
 * **draw_text_fast (self, text, x, y, color, bg = 0x0000):** Draw text on display (fast version). Need to set background.
 * **scroll_text (text, x, y, color, bg = 0x0000, delay = 10):** Scroll text on display.
