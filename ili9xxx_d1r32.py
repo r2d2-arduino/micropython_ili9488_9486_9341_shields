@@ -1026,15 +1026,15 @@ class ILI9XXX_8B():
         y (int) : Start Y position
         color (int): RGB565 2-byte color, example 0xF81F
         """
-        data = glyph[0] #memoryview to glyph
+        data   = ptr8(glyph[0]) #memoryview to glyph
         height = int(glyph[1])
-        width = int(glyph[2])
+        width  = int(glyph[2])
         
         i = 0
         for h in range(height):
             bit_len = 0                    
             while bit_len < width:
-                byte = int(data[i])
+                byte = data[i]
                 xpos = bit_len + x
                 ypos = h + y
                 
@@ -1091,7 +1091,7 @@ class ILI9XXX_8B():
             glyph_height = glyph[1]
             glyph_width = glyph[2]
             
-            if x + glyph_width > screen_width:
+            if x + glyph_width >= screen_width: # End of row
                 x = x_start
                 y += glyph_height
                 
@@ -1118,9 +1118,9 @@ class ILI9XXX_8B():
         color (int): RGB565 2-byte color, example 0xF81F
         bg (int) : Bacground, RGB565 2-byte color, example 0x001F
         """
-        glyph_data = glyph[0] #memoryview to glyph
+        glyph_data   = ptr8(glyph[0]) #memoryview to glyph
         glyph_height = int(glyph[1]) 
-        glyph_width = int(glyph[2])
+        glyph_width  = int(glyph[2])
         
         # End coordinates 
         x_end = x + glyph_width - 1
@@ -1153,7 +1153,7 @@ class ILI9XXX_8B():
             for dots_row in range(glyph_height): # 
                 dots_sum = 0                    
                 while dots_sum < glyph_width:
-                    byte = int(glyph_data[i])
+                    byte = glyph_data[i]
                     dot = 0
                     
                     while dot < 8 and dot + dots_sum <= glyph_width:
@@ -1184,7 +1184,7 @@ class ILI9XXX_8B():
             for dots_row in range(glyph_height): # 
                 dots_sum = 0                    
                 while dots_sum < glyph_width:
-                    byte = int(glyph_data[i])
+                    byte = glyph_data[i]
                     dot = 0
                     
                     while dot < 8 and dot + dots_sum <= glyph_width:
@@ -1219,7 +1219,7 @@ class ILI9XXX_8B():
             for dots_row in range(glyph_height): # 
                 dots_sum = 0                    
                 while dots_sum < glyph_width:
-                    byte = int(glyph_data[i])
+                    byte = glyph_data[i]
                     dot = 0
                     
                     while dot < 8 and dot + dots_sum <= glyph_width:
