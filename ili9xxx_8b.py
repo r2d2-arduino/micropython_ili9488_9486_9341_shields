@@ -414,7 +414,7 @@ class ILI9XXX_8B():
         Args
         x (int): X position on dispaly, example 100
         y (int): Y position on dispaly, example 200
-        color (int): RGB565 2-byte color, example 0xF800
+        color (int): RGB color
         """
         # Gpio preparation
         byte2gpio = ptr32(self.BYTE2GPIO)
@@ -499,7 +499,7 @@ class ILI9XXX_8B():
         y0 (int): Start Y position    \
         x1 (int): End X position       \ 
         y1 (int): End Y position        e
-        color (int): RGB565 2-byte color, example 0xF800
+        color (int): RGB color
         """
         dx = abs(x1 - x0)
         dy = abs(y1 - y0)
@@ -528,7 +528,7 @@ class ILI9XXX_8B():
         x (int): Start X position      xy
         y (int): Start Y position     h |   
         height (int): Height of line    v   
-        color (int): RGB565 2-byte color, example 0xF800
+        color (int): RGB color
         thickness (int): thickness of line
         """        
         self.fill_rect(x, y, thickness, height, color)
@@ -540,7 +540,7 @@ class ILI9XXX_8B():
         x (int): Start X position          xy----->
         y (int): Start Y position              w
         width (int): Width of line            
-        color (int): RGB565 2-byte color, example 0xF800
+        color (int): RGB color
         thickness (int): thickness of line
         """         
         self.fill_rect(x, y, width, thickness, color)
@@ -554,7 +554,7 @@ class ILI9XXX_8B():
         height (int): Height of line    h  |      .
         width (int): Width of square       v.......  
         thickness (int): thickness of line   
-        color (int): RGB565 2-byte color, example 0xF800
+        color (int): RGB color
         """         
         self.fill_rect(x, y, width, thickness, color)
         self.fill_rect(x , y + thickness, thickness, height, color)
@@ -569,7 +569,7 @@ class ILI9XXX_8B():
         y (int): Start Y position          |   w  .
         x_len (int): Width of rectangle  h |      .
         y_len (int): Height of rectangle   v.......
-        color (int): RGB565 2-byte color, example 0x0F80
+        color (int): RGB color
         """
         wr_bit = int(self.wr_bit)
         pxlf   = int(self.pixel_format)
@@ -626,7 +626,7 @@ class ILI9XXX_8B():
     def fill_screen(self, color):
         """ Fill whole screen
         Args
-        color (int): RGB565 2-byte color, example 0x07FF
+        color (int): RGB color
         """
         self.fill_rect(0, 0, self.width, self.height, color)
         
@@ -637,7 +637,7 @@ class ILI9XXX_8B():
         y (int): Start Y position              
         radius (int): Radius of circle         
         border (int): border of circle   
-        color (int): RGB565 2-byte color, example 0xFFFF
+        color (int): RGB color
         """
         if (x < 0 or y < 0 or x >= self.width or y >= self.height):
             print("Invalid params in draw_circle")
@@ -673,7 +673,7 @@ class ILI9XXX_8B():
         y (int): Start Y position              
         radius (int): Radius of circle         
         border (int): border of circle   
-        color (int): RGB565 2-byte color, example 0xFFFF
+        color (int): RGB color
         """
         for p in range(-radius, radius + 1):
             # Calculating the horizontal line
@@ -839,7 +839,7 @@ class ILI9XXX_8B():
         bitmap (bytes): Bytes of bitmap
         x_start (int): Start X position
         y_start (int): Start Y position
-        color (int): RGB565 2-byte color, example 0xFF80
+        color (int): RGB color
         """
         for y, row in enumerate(bitmap):
             for x in range(size):
@@ -853,8 +853,8 @@ class ILI9XXX_8B():
         bitmap (bytes): Bytes of bitmap
         x_start (int): Start X position
         y_start (int): Start Y position
-        color (int): RGB565 2-byte color, example 0xFF80
-        bg (int): Bacground, RGB565 2-byte color, example 0x08FF
+        color (int): RGB color
+        bg (int): Bacground, RGB color
         """
         wr_bit = int(self.wr_bit)
         pxlf   = int(self.pixel_format)
@@ -957,7 +957,7 @@ class ILI9XXX_8B():
         Args
         x (int) : Start X position
         y (int) : Start Y position
-        color (int): RGB565 2-byte color, example 0xF81F
+        color (int): RGB color
         """
         x_start = x
         screen_height = self.height
@@ -1000,7 +1000,7 @@ class ILI9XXX_8B():
         glyph (tuple) : Glyph data [data, height, width]
         x (int) : Start X position
         y (int) : Start Y position
-        color (int): RGB565 2-byte color, example 0xF81F
+        color (int): RGB color
         """
         data   = ptr8(glyph[0]) #memoryview to glyph
         height = int(glyph[1])
@@ -1040,8 +1040,8 @@ class ILI9XXX_8B():
         Args
         x (int) : Start X position
         y (int) : Start Y position
-        color (int): RGB565 2-byte color, example 0xFFE0
-        bg (int) : Bacground, RGB565 2-byte color, example 0x001F
+        color (int): RGB color
+        bg (int) : Bacground, RGB color
         """        
         x_start = x
         glyph_height = 0
@@ -1087,8 +1087,8 @@ class ILI9XXX_8B():
         glyph (tuple) : Glyph data [data, height, width]
         x (int) : Start X position
         y (int) : Start Y position
-        color (int): RGB565 2-byte color, example 0xF81F
-        bg (int) : Bacground, RGB565 2-byte color, example 0x001F
+        color (int): RGB color
+        bg (int) : Bacground, RGB color
         """
         glyph_data = ptr8(glyph[0]) #memoryview to glyph
         glyph_height = int(glyph[1]) 
@@ -1217,8 +1217,8 @@ class ILI9XXX_8B():
         Args
         x (int) : Start X position
         y (int) : Start Y position
-        color (int): RGB565 2-byte color, example 0xF81F
-        bg (int) : Bacground, RGB565 2-byte color, example 0x001F
+        color (int): RGB color
+        bg (int) : Bacground, RGB color
         delay (int): Delay between new lines (ms)
         """
         font = self.font        
