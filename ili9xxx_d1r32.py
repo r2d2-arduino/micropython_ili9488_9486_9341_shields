@@ -1,5 +1,5 @@
 """
-ILI9XXX_8B display-shield v 0.2.6
+ILI9XXX_8B display-shield v 0.2.7
 
 Displays: ILI9341, ILI9486, ILI9488
 Connection: 8-bit data bus
@@ -994,7 +994,7 @@ class ILI9XXX_8B():
         
         for char in text:
             if char == "\n": # New line
-                x = screen_height
+                x = screen_width
                 continue
             
             if char == "\t": #replace tab to space
@@ -1081,7 +1081,7 @@ class ILI9XXX_8B():
         
         for char in text:
             if char == "\n": # New line
-                x = screen_height
+                x = screen_width
                 continue
             
             if char == "\t": #replace tab to space
@@ -1101,7 +1101,7 @@ class ILI9XXX_8B():
             self._draw_glyph_fast(glyph, x, y, color, bg)
             x += glyph_width
             
-            if char == " " and (x + glyph_width) <= screen_height: # double size for space
+            if char == " " and (x + glyph_width) <= screen_width: # double size for space
                 self._draw_glyph_fast(glyph, x, y, color, bg)
                 x += glyph_width
                 
@@ -1121,26 +1121,18 @@ class ILI9XXX_8B():
         glyph_data   = ptr8(glyph[0]) #memoryview to glyph
         glyph_height = int(glyph[1]) 
         glyph_width  = int(glyph[2])
-        
-        # End coordinates 
-        x_end = x + glyph_width - 1
-        y_end = y + glyph_height - 1
-        if glyph_width % 8:
-            x_end += 1
  
         wr_bit = int(self.wr_bit)
         pxlf   = int(self.pixel_format)
         
         # Gpio preparation
-        byte2gpio = ptr32(self.BYTE2GPIO)
-        
+        byte2gpio = ptr32(self.BYTE2GPIO)        
         #Getting pointers to registers
         GPIO_OUT   = ptr32(GPIO_OUT_REG) # 0 - 31  pins
         GPIO_OUT_S = ptr32(GPIO_OUT_W1TS_REG) # + bit
         
-        self.cs.value(0) # CS = 0 - Device On
-        
-        self.set_window(x, y, x_end, y_end)
+        self.cs.value(0) # CS = 0 - Device On        
+        self.set_window(x, y, x + glyph_width - 1, y + glyph_height - 1)
                
         if pxlf == 0x55: # 16-bit
             # Main & Backrground color masks
@@ -1156,7 +1148,7 @@ class ILI9XXX_8B():
                     byte = glyph_data[i]
                     dot = 0
                     
-                    while dot < 8 and dot + dots_sum <= glyph_width:
+                    while dot < 8 and dot + dots_sum < glyph_width:
                         if (byte >> (7 - dot)) & 1: # main color
                             GPIO_OUT[0] = color_hi
                             GPIO_OUT_S[0] = wr_bit
@@ -1187,7 +1179,7 @@ class ILI9XXX_8B():
                     byte = glyph_data[i]
                     dot = 0
                     
-                    while dot < 8 and dot + dots_sum <= glyph_width:
+                    while dot < 8 and dot + dots_sum < glyph_width:
                         if (byte >> (7 - dot)) & 1: # main color
                             GPIO_OUT[0] = main1
                             GPIO_OUT_S[0] = wr_bit
@@ -1222,7 +1214,7 @@ class ILI9XXX_8B():
                     byte = glyph_data[i]
                     dot = 0
                     
-                    while dot < 8 and dot + dots_sum <= glyph_width:
+                    while dot < 8 and dot + dots_sum < glyph_width:
                         if (byte >> (7 - dot)) & 1: # main color
                             GPIO_OUT[0] = color_r
                             GPIO_OUT_S[0] = wr_bit
@@ -1271,7 +1263,7 @@ class ILI9XXX_8B():
         
         for char in text:
             if char == "\n": # New line
-                x = screen_height
+                x = screen_width
                 continue
             
             if char == "\t": #replace tab to space
@@ -1295,7 +1287,7 @@ class ILI9XXX_8B():
             self._draw_glyph_fast(glyph, x, y, color, bg)
             x += glyph_width
             
-            if char == " " and (x + glyph_width) <= screen_height: # double size for space
+            if char == " " and (x + glyph_width) <= screen_width: # double size for space
                 self._draw_glyph_fast(glyph, x, y, color, bg)
                 x += glyph_width            
              
