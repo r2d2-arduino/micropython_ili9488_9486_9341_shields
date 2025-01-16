@@ -64,45 +64,45 @@ WR_PIN = 4
 RD_PIN = 2
 RST_PIN = 33
 
-tft = ILI9488(DATA_PINS, CS_PIN, DC_PIN, WR_PIN, RD_PIN, RST_PIN)
+tft = ILI9488( DATA_PINS, CS_PIN, DC_PIN, WR_PIN, RD_PIN, RST_PIN )
 
-tft.fill_screen(0xF800) # Fill the screen with red color
+tft.fill_screen( 0xF800 ) # Fill the screen with red color
 ```
 ## Display functions:
 
-* **set_rotation (rotation = 0):** Set orientation of display. 0 = 0 degrees, 1 = 90 degrees, 2 = 180 degrees, 3 = 270 degrees.
-* **invert_display (on = True):** Enables or disables color inversion on the display.
-* **idle_mode (on = True):** Enables or disables idle mode on the display.
-* **set_adaptive_brightness (mode):** Set adaptive brightness.
-* **vert_scroll (top_fix, scroll_height, bot_fix):** Vertical scroll settings.
-* **vert_scroll_start_address (start = 0):** Set vertical scroll start address, and run scrolling.
-* **tearing_effect (on = True):** Activate "Tearing effect".
+* **set_rotation( rotation = 0 ):** Set orientation of display. 0 = 0 degrees, 1 = 90 degrees, 2 = 180 degrees, 3 = 270 degrees.
+* **invert_display( on = True ):** Enables or disables color inversion on the display.
+* **idle_mode( on = True ):** Enables or disables idle mode on the display.
+* **set_adaptive_brightness( mode ):** Set adaptive brightness.
+* **vert_scroll( top_fix, scroll_height, bot_fix ):** Vertical scroll settings.
+* **vert_scroll_start_address( start = 0 ):** Set vertical scroll start address, and run scrolling.
+* **tearing_effect( on = True ):** Activate "Tearing effect".
 
 ## Draw functions:
 
-* **fill_screen (color):** Fill whole screen.
-* **draw_pixel (x, y, color):** Draw one pixel on display.
-* **draw_line (x0, y0, x1, y1, color):** Draw line using Bresenham's Algorithm.
-* **draw_vline (x, y, height, color, thickness = 1):** Draw vertical line.
-* **draw_hline (x, y, width, color, thickness = 1):** Draw horizontal line.
-* **draw_rect (x, y, width, height, color, thickness = 1):** Draw rectangle.
-* **fill_rect (x, y, x_len, y_len, color):** Draw filled rectangle.
-* **draw_circle (x, y, radius, color, border = 1):** Draw circle.
-* **fill_circle (x, y, radius, color):** Draw filled circle.
+* **fill_screen( color ):** Fill whole screen.
+* **draw_pixel( x, y, color ):** Draw one pixel on display.
+* **draw_line( x0, y0, x1, y1, color ):** Draw line using Bresenham's Algorithm.
+* **draw_vline( x, y, height, color, thickness = 1 ):** Draw vertical line.
+* **draw_hline( x, y, width, color, thickness = 1 ):** Draw horizontal line.
+* **draw_rect( x, y, width, height, color, thickness = 1 ):** Draw rectangle.
+* **fill_rect( x, y, width, height, color ):** Draw filled rectangle.
+* **draw_circle( x, y, radius, color, border = 1 ):** Draw circle.
+* **fill_circle( x, y, radius, color ):** Draw filled circle.
 
 ## Image functions:
 
-* **draw_bmp (filename, x = 0, y = 0):** Draw BMP image on display.
-* **draw_raw_image (filename, x, y, width, height):** Draw RAW image (RGB565 format) on display.
-* **draw_bitmap (bitmap, x_start, y_start, size, color ):** Draw bitmap.
-* **draw_bitmap_fast (bitmap, x_start, y_start, size, color, bg):** Draw bitmap (fast version). Need to set background.
-* **rgb (red, green, blue):** Convert 8,8,8 bits RGB to 16/18/24 bits.
+* **draw_bmp( filename, x = 0, y = 0 ):** Draw BMP image on display.
+* **draw_raw_image( filename, x, y, width, height ):** Draw RAW image (RGB565 format) on display.
+* **rgb( red, green, blue ):** Convert 8,8,8 bits RGB to 16/18/24 bits.
 
 ## Text functions:
 
-* **set_font (font):** Set font for text. Converted font is used. See *utils/font_to_py.py*.
-* **draw_text (text, x, y, color):** Draw text on display.
-* **draw_text_fast (self, text, x, y, color, bg = 0x0000):** Draw text on display (fast version). Need to set background.
-* **scroll_text (text, x, y, color, bg = 0x0000, delay = 10):** Scroll text on display.
+* **set_font( font ):** Set font for text. Converted font is used. See *utils/font_to_py.py*.
+* **draw_text( text, x, y, color ):** Draw text on display.
+* **draw_text_fast( self, text, x, y, color, bg = 0x0000 ):** Draw text on display (fast version). Need to set background.
+* **draw_bitmap( bitmap, x, y, color ):** Draw one bitmap (char) on display.
+* **draw_bitmap_fast( bitmap, x, y, color, bg ):** Draw one bitmap (fast version). Need to set background.
+* **scroll_text( text, x, y, color, bg = 0x0000, delay = 10 ):** Scroll text on display.
 
 ![Photo of back side of Esp32-D1R32](/../main/photos/ili9xxx_example.png)
