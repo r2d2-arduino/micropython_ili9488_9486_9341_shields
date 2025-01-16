@@ -1,4 +1,5 @@
 # Set pins here or choose one of the sets
+
 # for Esp32-S3
 DATA_PINS = [9, 8, 18, 17, 15, 16, 3, 14] #D0..D7
 CS_PIN  = 6
@@ -14,6 +15,7 @@ DC_PIN  = 27 # rs/dc
 WR_PIN  = 28
 RD_PIN  = 22 
 RST_PIN = 21
+
 #for ESP32 D1R32
 DATA_PINS = [12, 13, 26, 25, 17, 16, 27, 14]
 CS_PIN = 32

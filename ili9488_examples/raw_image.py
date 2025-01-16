@@ -14,6 +14,7 @@ DC_PIN  = 27 # rs/dc
 WR_PIN  = 28
 RD_PIN  = 22 
 RST_PIN = 21
+
 #for ESP32 D1R32
 DATA_PINS = [12, 13, 26, 25, 17, 16, 27, 14]
 CS_PIN = 32
