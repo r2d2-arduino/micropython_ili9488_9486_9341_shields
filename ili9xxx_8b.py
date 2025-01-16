@@ -1,5 +1,5 @@
 """
-ILI9XXX_8B display-shield v 0.2.7
+ILI9XXX_8B display-shield v 0.2.8
 
 Displays: ILI9341, ILI9486, ILI9488
 Connection: 8-bit Data Bus
@@ -7,6 +7,7 @@ Colors: 16-bit, 18-bit, 24-bit
 Controllers: Esp32, Esp32-S3, Raspberry Pi Pico
  
 Project path: https://github.com/r2d2-arduino/micropython_ili9488_9486_9341_shields
+MIT License
 
 Author: Arthur Derkach 
 """
@@ -701,7 +702,7 @@ class ILI9XXX_8B():
     def draw_raw_image(self, filename, x: int, y: int, width: int, height: int):
         """ Draw RAW image (RGB565 format) on display
         Args
-        filename (string): filename of image, example: "rain.bmp"
+        filename (string): filename of image, example: "rain.raw"
         x (int) : Start X position
         y (int) : Start Y position
         width (int) : Width of raw image
@@ -731,6 +732,7 @@ class ILI9XXX_8B():
                     GPIO_OUT_S[0] = wr_bit
                     
             self.cs.value(1)  # Chip disabled
+            f.close()
         else:
             print("Supports 16-bit display format only")
 
@@ -774,6 +776,7 @@ class ILI9XXX_8B():
                 self._send_bmp_to_display(f, frameHeight, frameWidth, offset, rowsize)
          
                 self.cs.value(1)
+        f.close()
                     
                     
     @micropython.viper           
@@ -832,114 +835,6 @@ class ILI9XXX_8B():
                     GPIO_OUT[0] = byte2gpio[ red ]
                     GPIO_OUT_S[0] = wr_bit               
                     col -= 1 
-                
-    def draw_bitmap( self, bitmap, x_start, y_start, size, color ):
-        """ Draw bitmap
-        Args
-        bitmap (bytes): Bytes of bitmap
-        x_start (int): Start X position
-        y_start (int): Start Y position
-        color (int): RGB color
-        """
-        for y, row in enumerate(bitmap):
-            for x in range(size):
-                if (row >> x) & 1:
-                    self.draw_pixel( x_start + x, y_start + y, color )
-
-    @micropython.viper
-    def draw_bitmap_fast( self, bitmap, x_start:int, y_start:int, size:int, color:int, bg:int ):
-        """ Draw bitmap (fast version)
-        Args
-        bitmap (bytes): Bytes of bitmap
-        x_start (int): Start X position
-        y_start (int): Start Y position
-        color (int): RGB color
-        bg (int): Bacground, RGB color
-        """
-        wr_bit = int(self.wr_bit)
-        pxlf   = int(self.pixel_format)
-        
-        byte2gpio  = ptr32(self.BYTE2GPIO)
-        #Getting pointers to registers
-        GPIO_OUT   = ptr32(self.GPIO_OUT_REG) # 0 - 31  pins
-        GPIO_OUT_S = ptr32(self.GPIO_OUT_SET) # + bit
-        
-        self.set_window(x_start, y_start, x_start + size - 1, y_start + size - 1)
-        
-        # Main & Backrground color masks        
-        if pxlf == 0x55: # 16-bit
-            color_hi  = byte2gpio[(color >> 8) & 0xFF]
-            color_low = byte2gpio[color & 0xFF]
-            bg_hi     = byte2gpio[bg >> 8]
-            bg_low    = byte2gpio[bg & 0xFF]
-
-            for y in range(size):
-                row = int(bitmap[y])
-                for x in range(size):
-                    if (row >> x) & 1: # main color
-                        GPIO_OUT[0] = color_hi
-                        GPIO_OUT_S[0] = wr_bit
-                        GPIO_OUT[0] = color_low
-                        GPIO_OUT_S[0] = wr_bit
-                    else: # background
-                        GPIO_OUT[0] = bg_hi
-                        GPIO_OUT_S[0] = wr_bit
-                        GPIO_OUT[0] = bg_low
-                        GPIO_OUT_S[0] = wr_bit
-        elif pxlf == 0x66: # 18-bit
-            main1 = byte2gpio[ (color >> 10) & 0xFF ] 
-            main2 = byte2gpio[ (color >> 2) & 0xFF ]  
-            main3 = byte2gpio[ (color << 4) & 0xF0 ]
-            
-            bg1 = byte2gpio[ (bg >> 10) & 0xFF ] 
-            bg2 = byte2gpio[ (bg >> 2) & 0xFF ]  
-            bg3 = byte2gpio[ (bg << 4) & 0xF0 ]
-
-            for y in range(size):
-                row = int(bitmap[y])
-                for x in range(size):
-                    if (row >> x) & 1: # main color
-                        GPIO_OUT[0] = main1
-                        GPIO_OUT_S[0] = wr_bit
-                        GPIO_OUT[0] = main2
-                        GPIO_OUT_S[0] = wr_bit
-                        GPIO_OUT[0] = main3
-                        GPIO_OUT_S[0] = wr_bit                    
-                    else: # background
-                        GPIO_OUT[0] = bg1
-                        GPIO_OUT_S[0] = wr_bit
-                        GPIO_OUT[0] = bg2
-                        GPIO_OUT_S[0] = wr_bit
-                        GPIO_OUT[0] = bg3
-                        GPIO_OUT_S[0] = wr_bit
-        else: # PIXEL_FORMAT == 0x77: 24-bit 
-            color_r = byte2gpio[(color >> 16) & 0xFF ] 
-            color_g = byte2gpio[(color >> 8) & 0xFF ]  
-            color_b = byte2gpio[color & 0xFF]
-            
-            bg_r = byte2gpio[(bg >> 16) & 0xFF ] 
-            bg_g = byte2gpio[(bg >> 8) & 0xFF ]  
-            bg_b = byte2gpio[bg & 0xFF]
-
-            for y in range(size):
-                row = int(bitmap[y])
-                for x in range(size):
-                    if (row >> x) & 1: # main color
-                        GPIO_OUT[0] = color_r
-                        GPIO_OUT_S[0] = wr_bit
-                        GPIO_OUT[0] = color_g
-                        GPIO_OUT_S[0] = wr_bit
-                        GPIO_OUT[0] = color_b
-                        GPIO_OUT_S[0] = wr_bit                    
-                    else: # background
-                        GPIO_OUT[0] = bg_r
-                        GPIO_OUT_S[0] = wr_bit
-                        GPIO_OUT[0] = bg_g
-                        GPIO_OUT_S[0] = wr_bit
-                        GPIO_OUT[0] = bg_b
-                        GPIO_OUT_S[0] = wr_bit 
-                    
-        GPIO_OUT_S[0] = int(self.cs_bit) # CS = 1 - Device Off
   
     """
     *** Text area ***
@@ -990,21 +885,21 @@ class ILI9XXX_8B():
             if y + glyph_height > screen_height: # End of screen
                 break                
                 
-            self._draw_glyph(glyph, x, y, color)
+            self.draw_bitmap(glyph, x, y, color)
             x += glyph_width              
                 
     @micropython.viper
-    def _draw_glyph(self, glyph, x:int, y:int, color:int):
-        """ Draw one glyph (char) on display
+    def draw_bitmap(self, bitmap, x:int, y:int, color:int):
+        """ Draw one bitmap (char) on display
         Args
-        glyph (tuple) : Glyph data [data, height, width]
+        bitmap (tuple) : Bitmap data [data, height, width]
         x (int) : Start X position
         y (int) : Start Y position
         color (int): RGB color
         """
-        data   = ptr8(glyph[0]) #memoryview to glyph
-        height = int(glyph[1])
-        width  = int(glyph[2])
+        data   = ptr8(bitmap[0]) #memoryview to bitmap
+        height = int(bitmap[1])
+        width  = int(bitmap[2])
         
         i = 0
         for h in range(height):
@@ -1072,27 +967,27 @@ class ILI9XXX_8B():
             if y + glyph_height >= screen_height: # End of screen
                 break
                 
-            self._draw_glyph_fast(glyph, x, y, color, bg)
+            self.draw_bitmap_fast(glyph, x, y, color, bg)
             x += glyph_width
             
             if char == " " and (x + glyph_width) <= screen_width: # double size for space
-                self._draw_glyph_fast(glyph, x, y, color, bg)
+                self.draw_bitmap_fast(glyph, x, y, color, bg)
                 x += glyph_width
         self.cs.value(1)
   
     @micropython.viper
-    def _draw_glyph_fast(self, glyph, x:int, y:int, color:int, bg: int):
-        """ Draw one glyph (char) on display (Fast version)
+    def draw_bitmap_fast(self, bitmap, x:int, y:int, color:int, bg: int):
+        """ Draw one bitmap (char) on display (Fast version)
         Args
-        glyph (tuple) : Glyph data [data, height, width]
+        bitmap (tuple) : Bitmap data [data, height, width]
         x (int) : Start X position
         y (int) : Start Y position
         color (int): RGB color
         bg (int) : Bacground, RGB color
         """
-        glyph_data = ptr8(glyph[0]) #memoryview to glyph
-        glyph_height = int(glyph[1]) 
-        glyph_width = int(glyph[2])
+        data  = ptr8(bitmap[0]) #memoryview to bitmap
+        height = int(bitmap[1]) 
+        width  = int(bitmap[2])
  
         pxlf   = int(self.pixel_format)
         wr_bit = int(self.wr_bit)        
@@ -1103,7 +998,7 @@ class ILI9XXX_8B():
         GPIO_OUT   = ptr32(self.GPIO_OUT_REG) # 0 - 31  pins
         GPIO_OUT_S = ptr32(self.GPIO_OUT_SET) # + bit
         
-        self.set_window(x, y, x + glyph_width - 1, y + glyph_height - 1)
+        self.set_window(x, y, x + width - 1, y + height - 1)
         
         # Main & Backrground color masks
         if pxlf == 0x55: # 16-bit
@@ -1113,13 +1008,13 @@ class ILI9XXX_8B():
             bg_low     = byte2gpio[bg & 0xFF]
             # Sending Color data        
             i = 0
-            for dots_row in range(glyph_height): # 
+            for dots_row in range(height): # 
                 dots_sum = 0                    
-                while dots_sum < glyph_width:
-                    byte = glyph_data[i]
+                while dots_sum < width:
+                    byte = data[i]
                     dot = 0
                     
-                    while dot < 8 and dot + dots_sum < glyph_width:
+                    while dot < 8 and dot + dots_sum < width:
                         if (byte >> (7 - dot)) & 1: # main color
                             GPIO_OUT[0] = color_hi
                             GPIO_OUT_S[0] = wr_bit
@@ -1144,13 +1039,13 @@ class ILI9XXX_8B():
             bg3 = byte2gpio[ (bg << 4) & 0xF0 ]        
             
             i = 0
-            for dots_row in range(glyph_height): # 
+            for dots_row in range(height): # 
                 dots_sum = 0                    
-                while dots_sum < glyph_width:
-                    byte = glyph_data[i]
+                while dots_sum < width:
+                    byte = data[i]
                     dot = 0
                     
-                    while dot < 8 and dot + dots_sum < glyph_width:
+                    while dot < 8 and dot + dots_sum < width:
                         if (byte >> (7 - dot)) & 1: # main color
                             GPIO_OUT[0] = main1
                             GPIO_OUT_S[0] = wr_bit
@@ -1179,13 +1074,13 @@ class ILI9XXX_8B():
             bg_b = byte2gpio[bg & 0xFF]        
             
             i = 0
-            for dots_row in range(glyph_height): # 
+            for dots_row in range(height): # 
                 dots_sum = 0                    
-                while dots_sum < glyph_width:
-                    byte = glyph_data[i]
+                while dots_sum < width:
+                    byte = data[i]
                     dot = 0
                     
-                    while dot < 8 and dot + dots_sum < glyph_width:
+                    while dot < 8 and dot + dots_sum < width:
                         if (byte >> (7 - dot)) & 1: # main color
                             GPIO_OUT[0] = color_r
                             GPIO_OUT_S[0] = wr_bit
@@ -1253,11 +1148,11 @@ class ILI9XXX_8B():
                 if run_scrolling:
                     self._scroll_row(y, glyph_height, screen_width, bg, delay)
                 
-            self._draw_glyph_fast(glyph, x, y, color, bg)
+            self.draw_bitmap_fast(glyph, x, y, color, bg)
             x += glyph_width
             
             if char == " " and (x + glyph_width) <= screen_width: # double size for space
-                self._draw_glyph_fast(glyph, x, y, color, bg)
+                self.draw_bitmap_fast(glyph, x, y, color, bg)
                 x += glyph_width
         self.cs.value(1)
              
