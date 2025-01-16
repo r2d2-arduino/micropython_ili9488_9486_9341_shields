@@ -563,13 +563,13 @@ class ILI9XXX_8B():
         self.fill_rect(x + width, y, thickness, height, color)
 
     @micropython.viper
-    def fill_rect(self, x:int, y:int, x_len:int, y_len:int, color:int):
+    def fill_rect(self, x:int, y:int, width:int, height:int, color:int):
         """ Draw filled rectangle
         Args
         x (int): Start X position          xy----->
         y (int): Start Y position          |   w  .
-        x_len (int): Width of rectangle  h |      .
-        y_len (int): Height of rectangle   v.......
+        width (int): Width of rectangle  h |      .
+        height (int): Height of rectangle  v.......
         color (int): RGB color
         """
         wr_bit = int(self.wr_bit)
@@ -580,9 +580,9 @@ class ILI9XXX_8B():
         GPIO_OUT   = ptr32(self.GPIO_OUT_REG)  # 0 - 31  pins
         GPIO_OUT_S = ptr32(self.GPIO_OUT_SET) # + bit
         
-        self.set_window(x, y, x + x_len - 1, y + y_len - 1) # Setting draw area
+        self.set_window(x, y, x + width - 1, y + height - 1) # Setting draw area
         
-        amount = x_len * y_len # amount of pixels
+        amount = width * height # amount of pixels
 
         if pxlf == 0x55: # 16 bit
             color_hi  = byte2gpio[(color >> 8) & 0xFF] 

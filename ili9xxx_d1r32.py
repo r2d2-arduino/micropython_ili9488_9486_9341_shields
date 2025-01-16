@@ -568,13 +568,13 @@ class ILI9XXX_8B():
         self.fill_rect(x + width, y, thickness, height, color)
     
     @micropython.viper
-    def fill_rect(self, x:int, y:int, x_len:int, y_len:int, color:int):
+    def fill_rect(self, x:int, y:int, width:int, height:int, color:int):
         """ Draw filled rectangle
         Args
         x (int): Start X position          xy----->
         y (int): Start Y position          |   w  .
-        x_len (int): Width of rectangle  h |      .
-        y_len (int): Height of rectangle   v.......
+        width (int): Width of rectangle  h |      .
+        height (int): Height of rectangle  v.......
         color (int): RGB color
         """
         cs_bit = int(self.cs_bit)
@@ -590,10 +590,10 @@ class ILI9XXX_8B():
         
         GPIO_OUT1_C[0] = cs_bit # CS = 0 - Device On
         
-        self.set_window(x, y, x + x_len - 1, y + y_len - 1) # Setting draw area
+        self.set_window(x, y, x + width - 1, y + height - 1) # Setting draw area
         
         # Sending Color data       
-        amount = x_len * y_len # amount of pixels
+        amount = width * height # amount of pixels
     
         if pxlf == 0x55: # 16 bit
             
