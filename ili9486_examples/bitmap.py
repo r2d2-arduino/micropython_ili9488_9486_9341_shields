@@ -24,27 +24,8 @@ RST_PIN = 33
 '''
 
 from ili9486 import ILI9486
+from bitmaps import rain
 
-sun = [0x0,0x80,0x2084,0x1888,0xc18,0x3c0,0x7e0,0x77ec,0x37ee,0x7e0,0x3c0,0xc18,0x1808,0x2084,0x80,0x0]
-"""
-sun = [
-    b'0000000000000000',
-    b'0000000010000000',
-    b'0010000010000100',
-    b'0001100010001000',
-    b'0000110000011000',
-    b'0000001111000000',
-    b'0000011111100000',
-    b'0111011111101100',
-    b'0011011111101110',
-    b'0000011111100000',
-    b'0000001111000000',
-    b'0000110000011000',
-    b'0001100000001000',
-    b'0010000010000100',
-    b'0000000010000000',
-    b'0000000000000000']
-"""
 tft = ILI9486(DATA_PINS, CS_PIN, DC_PIN, WR_PIN, RD_PIN, RST_PIN)
 
 COLOR_BLACK   = tft.rgb( 0, 0, 0 )
@@ -69,7 +50,7 @@ start = time.ticks_ms()
 for i in range(len(colors)):  
     for y in range(30):        
         for x in range(20):            
-            tft.draw_bitmap_fast(sun, x * size, y * size, size, colors[i], COLOR_BLACK)
+            tft.draw_bitmap_fast(rain, x * size, y * size, colors[i], COLOR_BLACK)
     
 print(time.ticks_diff(time.ticks_ms(), start), 'ms')
 
