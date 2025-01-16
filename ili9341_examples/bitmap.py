@@ -24,6 +24,7 @@ RST_PIN = 33
 '''
 
 from ili9341 import ILI9341
+from bitmaps import rain
 
 tft = ILI9341(DATA_PINS, CS_PIN, DC_PIN, WR_PIN, RD_PIN, RST_PIN)
 
@@ -39,27 +40,6 @@ COLOR_GRAY    = tft.rgb( 112, 160, 112 )
 
 tft.fill_screen(COLOR_BLACK) # Fill the screen with black color
 
-sun = [0x0,0x80,0x2084,0x1888,0xc18,0x3c0,0x7e0,0x77ec,0x37ee,0x7e0,0x3c0,0xc18,0x1808,0x2084,0x80,0x0]
-"""
-sun = [
-    b'0000000000000000',
-    b'0000000010000000',
-    b'0010000010000100',
-    b'0001100010001000',
-    b'0000110000011000',
-    b'0000001111000000',
-    b'0000011111100000',
-    b'0111011111101100',
-    b'0011011111101110',
-    b'0000011111100000',
-    b'0000001111000000',
-    b'0000110000011000',
-    b'0001100000001000',
-    b'0010000010000100',
-    b'0000000010000000',
-    b'0000000000000000']
-"""
-
 size = 16
     
 colors = [COLOR_WHITE, COLOR_CYAN, COLOR_MAGENTA, COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_YELLOW]
@@ -71,6 +51,6 @@ for i in range(len(colors)):
     color = colors[i]
     for y in range(20):
         for x in range(15):
-            tft.draw_bitmap_fast(sun, x * size, y * size, size, color, COLOR_BLACK)
+            tft.draw_bitmap_fast(rain, x * size, y * size, color, COLOR_BLACK)
               
 print((time.ticks_ms()-start), 'ms')
