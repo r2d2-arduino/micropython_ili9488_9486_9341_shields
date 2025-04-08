@@ -1,19 +1,4 @@
 # Set pins here or choose one of the sets
-# for Esp32-S3
-DATA_PINS = [9, 8, 18, 17, 15, 16, 3, 14] #D0..D7
-CS_PIN  = 6
-DC_PIN  = 7 # = RS_PIN
-WR_PIN  = 1
-RD_PIN  = 2
-RST_PIN = 5
-'''
-#for RP2
-DATA_PINS = [2, 1, 8, 7, 6, 5, 4, 3]
-CS_PIN  = 26
-DC_PIN  = 27 # rs/dc
-WR_PIN  = 28
-RD_PIN  = 22 
-RST_PIN = 21
 
 #for ESP32 D1R32
 DATA_PINS = [12, 13, 26, 25, 17, 16, 27, 14]
@@ -22,6 +7,22 @@ DC_PIN = 15 #rs/dc
 WR_PIN = 4
 RD_PIN = 2
 RST_PIN = 33
+'''
+#for RP2
+DATA_PINS = [8, 9, 2, 3, 4, 5, 6, 7]
+CS_PIN  = 29
+DC_PIN  = 28 # rs/dc
+WR_PIN  = 27
+RD_PIN  = 26
+RST_PIN = 24
+
+# for Esp32-S3
+DATA_PINS = [9, 8, 18, 17, 15, 16, 3, 14] #D0..D7
+CS_PIN  = 6
+DC_PIN  = 7 # = RS_PIN
+WR_PIN  = 1
+RD_PIN  = 2
+RST_PIN = 5
 '''
 
 def file_exists(filename):
