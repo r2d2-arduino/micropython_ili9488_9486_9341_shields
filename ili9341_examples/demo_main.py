@@ -1,19 +1,5 @@
 # Set pins here or choose one of the sets
-# for Esp32-S3
-DATA_PINS = [9, 8, 18, 17, 15, 16, 3, 14] #D0..D7
-CS_PIN  = 6
-DC_PIN  = 7 # = RS_PIN
-WR_PIN  = 1
-RD_PIN  = 2
-RST_PIN = 5
-'''
-#for RP2
-DATA_PINS = [2, 1, 8, 7, 6, 5, 4, 3]
-CS_PIN  = 26
-DC_PIN  = 27 # rs/dc
-WR_PIN  = 28
-RD_PIN  = 22 
-RST_PIN = 21
+
 #for ESP32 D1R32
 DATA_PINS = [12, 13, 26, 25, 17, 16, 27, 14]
 CS_PIN = 32
@@ -22,9 +8,26 @@ WR_PIN = 4
 RD_PIN = 2
 RST_PIN = 33
 '''
+#for RP2
+DATA_PINS = [8, 9, 2, 3, 4, 5, 6, 7]
+CS_PIN  = 29
+DC_PIN  = 28 # rs/dc
+WR_PIN  = 27
+RD_PIN  = 26
+RST_PIN = 24
+
+# for Esp32-S3
+DATA_PINS = [9, 8, 18, 17, 15, 16, 3, 14] #D0..D7
+CS_PIN  = 6
+DC_PIN  = 7 # = RS_PIN
+WR_PIN  = 1
+RD_PIN  = 2
+RST_PIN = 5
+'''
 
 from ili9341 import ILI9341
 import LibreBodoni24 as bigFont
+from bitmaps import rain
 import time
 
 delay = 10
@@ -53,11 +56,12 @@ sun    = [0x0,0x80,0x2084,0x1888,0xc18,0x3c0,0x7e0,0x77ec,0x37ee,0x7e0,0x3c0,0xc
 colors = [COLOR_WHITE, COLOR_CYAN, COLOR_MAGENTA, COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_YELLOW]
 size = 16
 
+
 for i in range(len(colors)):
     color = colors[i]
     for y in range(20):
         for x in range(15):
-            tft.draw_bitmap_fast(sun, x * size, y * size, size, color, COLOR_BLACK)
+            tft.draw_bitmap_fast(rain, x * size, y * size, color, COLOR_BLACK)
 
 #blue gradient
 for y in range(32):
