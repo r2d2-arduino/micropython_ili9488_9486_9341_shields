@@ -45,7 +45,8 @@ After that, a set of new calibration parameters will be displayed, which should 
 The main libraries inherit from the graphics libraries tft_draw:
 https://github.com/r2d2-arduino/tft_draw
 
-## Minimum code to run (ILI9488):
+## Minimum code to run:
+The script will attempt to detect the display model automatically, but you can also specify it manually. For example, by setting input parameter display_model = 0x9488.
 ```python
 from ili9xxx_8b_direct import ILI9XXX_8B_DIRECT
 
