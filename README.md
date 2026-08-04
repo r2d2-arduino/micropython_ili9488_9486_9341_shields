@@ -29,32 +29,25 @@ For Esp32 D1R32: CS pin should be 32 or 33 (This pin uses a register GPIO_OUT1_R
 
 ## File Structure:
 
-* **ili9xxx_8b.py** - Base library for ILI9341/ILI9486/ILI9488. Specified on Esp32, Raspberry Pi Pico and Esp32-S3.
-* **ili9xxx_d1r32.py** - Base library for ILI9341/ILI9486/ILI9488. Specified on Esp32 D1R32 only.
-* **ili9341.py** - Main library for ILI9341 display (2.4"..2.8"). 
-* **ili9486.py** - Main library for ILI9486 display (3.5"). 
-* **ili9488.py** - Main library for ILI9488 display (3.5"..4"). 
-
-* **ili9xxx_pin_checker.py** - Checks the correct connection of pins to controller. Use when you want to change recommended pins.
-* **resist_touch.py** - resistive touchscreen library. Specified on Esp32.
-* **resist_touch_rp2.py** - resistive touchscreen library. Specified on Raspberry Pi Pico.
-
-* **touch_calibration_ili9488.py**, **touch_calibration_ili9486.py**,  **touch_calibration_ili9341.py** - Touchscreen calibration tool. Run and click on 9 green squares one by one.
+* **ili9xxx_8b.py** - Base library ILI9XXX_8B for ILI9341/ILI9486/ILI9488. Specified on Esp32, RPi Pico and Esp32-S3.
+* **ili9xxx_8b_direct.py** - Main library ILI9XXX_8B_DIRECT with direct draw.
+* **ili9xxx_8b_fb.py** - Main library ILI9XXX_8B_FB with framebuffer.
+* **resist_touch.py** - resistive touchscreen library.
+* **touch_calibration_ili9xxx.py** - Touchscreen calibration tool. Run and click on 9 green squares one by one.
 After that, a set of new calibration parameters will be displayed, which should be replaced in resist_touch.py on ​​line 22-24.
+* **ili9xxx_pin_checker.py** - Checks the correct connection of pins to controller. Use when you want to change recommended pins.
 
-* **ILI9341_example/** - a set of examples for using the library ILI9341.py
-* **ILI9486_example/** - a set of examples for using the library ILI9486.py
-* **ILI9488_example/** - a set of examples for using the library ILI9488.py
-* **for_examples/** - files related to examples.
-* **mpy_6.3/** - pre-compressed versions of libraries. Use them if you don't have enough RAM.
-* **utils/** - a set of utils:
-  - *utils/font_to_py.py* - Used to convert ttf font to py script. First of all, you need to install: `pip install freetype-py`. Then run a command similar to the example:
-`python font_to_py.py -x LibreBodoni-Bold.ttf 24 LibreBodoni24.py`. More details: https://github.com/peterhinch/micropython-font-to-py
-  - *utils/img2rgb565.py* - Used to convert BMP-image to RAW RGB565 format. Usage: `python img2rgb565.py <your_image>`
-  
+* **examples/** - a set of examples for using the library ILI9XXX_8B_DIRECT
+* **examples_fb/** - a set of examples for using the library ILI9XXX_8B_FB
+* **resources/** - related files for examples.
+
+## Dependencies:
+The main libraries inherit from the graphics libraries tft_draw:
+https://github.com/r2d2-arduino/tft_draw
+
 ## Minimum code to run (ILI9488):
 ```python
-from ili9488 import ILI9488
+from ili9xxx_8b_direct import ILI9XXX_8B_DIRECT
 
 #Esp32 D1R32
 DATA_PINS = [12, 13, 26, 25, 17, 16, 27, 14]
@@ -64,9 +57,9 @@ WR_PIN = 4
 RD_PIN = 2
 RST_PIN = 33
 
-tft = ILI9488( DATA_PINS, CS_PIN, DC_PIN, WR_PIN, RD_PIN, RST_PIN )
+tft = ILI9XXX_8B_DIRECT( DATA_PINS, CS_PIN, DC_PIN, WR_PIN, RD_PIN, RST_PIN )
 
-tft.fill_screen( 0xF800 ) # Fill the screen with red color
+tft.fill( tft.rgb(255, 0, 0) ) # Fill the screen with red color
 ```
 ## Display functions:
 
@@ -77,32 +70,5 @@ tft.fill_screen( 0xF800 ) # Fill the screen with red color
 * **vert_scroll( top_fix, scroll_height, bot_fix ):** Vertical scroll settings.
 * **vert_scroll_start_address( start = 0 ):** Set vertical scroll start address, and run scrolling.
 * **tearing_effect( on = True ):** Activate "Tearing effect".
-
-## Draw functions:
-
-* **fill_screen( color ):** Fill whole screen.
-* **draw_pixel( x, y, color ):** Draw one pixel on display.
-* **draw_line( x0, y0, x1, y1, color ):** Draw line using Bresenham's Algorithm.
-* **draw_vline( x, y, height, color, thickness = 1 ):** Draw vertical line.
-* **draw_hline( x, y, width, color, thickness = 1 ):** Draw horizontal line.
-* **draw_rect( x, y, width, height, color, thickness = 1 ):** Draw rectangle.
-* **fill_rect( x, y, width, height, color ):** Draw filled rectangle.
-* **draw_circle( x, y, radius, color, border = 1 ):** Draw circle.
-* **fill_circle( x, y, radius, color ):** Draw filled circle.
-
-## Image functions:
-
-* **draw_bmp( filename, x = 0, y = 0 ):** Draw BMP image on display.
-* **draw_raw_image( filename, x, y, width, height ):** Draw RAW image (RGB565 format) on display.
-* **rgb( red, green, blue ):** Convert 8,8,8 bits RGB to 16/18/24 bits.
-
-## Text functions:
-
-* **set_font( font ):** Set font for text. Converted font is used. See *utils/font_to_py.py*.
-* **draw_text( text, x, y, color ):** Draw text on display.
-* **draw_text_fast( self, text, x, y, color, bg = 0x0000 ):** Draw text on display (fast version). Need to set background.
-* **draw_bitmap( bitmap, x, y, color ):** Draw one bitmap (char) on display.
-* **draw_bitmap_fast( bitmap, x, y, color, bg ):** Draw one bitmap (fast version). Need to set background.
-* **scroll_text( text, x, y, color, bg = 0x0000, delay = 10 ):** Scroll text on display.
 
 ![Photo of back side of Esp32-D1R32](/../main/photos/ili9xxx_example.png)
