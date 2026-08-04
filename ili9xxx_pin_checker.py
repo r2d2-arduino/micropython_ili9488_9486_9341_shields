@@ -1,38 +1,11 @@
 """
-
-ILI9XXX_PIN_CHECKER for 8-bit shield v 0.2.2
+ILI9XXX_PIN_CHECKER for 8-bit shield v 0.2.3
 
 Project path: https://github.com/r2d2-arduino/micropython_ili9488_9486_9341_shields
+MIT License
 
-Author: r2d2-arduino
-
+Author: Arthur Derkach
 """
-# Set pins here or choose one of the sets
-
-# for Esp32-S3
-DATA_PINS = [9, 8, 18, 17, 15, 16, 3, 14] #D0..D7
-CS_PIN  = 6
-DC_PIN  = 7 # = RS_PIN
-WR_PIN  = 1
-RD_PIN  = 2
-RST_PIN = 5
-'''
-#for RP2
-DATA_PINS = [2, 1, 8, 7, 6, 5, 4, 3]
-CS_PIN  = 26
-DC_PIN  = 27 # rs/dc
-WR_PIN  = 28
-RD_PIN  = 22 
-RST_PIN = 21
-
-#for ESP32 D1R32
-DATA_PINS = [12, 13, 26, 25, 17, 16, 27, 14]
-CS_PIN = 32
-DC_PIN = 15 #rs/dc
-WR_PIN = 4
-RD_PIN = 2
-RST_PIN = 33
-'''
 from machine import Pin
 from time import sleep_ms
 from os import uname
@@ -59,7 +32,8 @@ class ILI9XXX_PIN_CHECKER:
         self.db5 = Pin(data_pins[5], Pin.OUT, value = 0)
         self.db6 = Pin(data_pins[6], Pin.OUT, value = 0)
         self.db7 = Pin(data_pins[7], Pin.OUT, value = 0)
-        self.db_pins = [self.db0, self.db1, self.db2, self.db3, self.db4, self.db5, self.db6, self.db7]
+        self.db_pins = [self.db0, self.db1, self.db2, self.db3,
+                        self.db4, self.db5, self.db6, self.db7]
                
         self.cs = Pin(cs_pin, Pin.OUT, value = 1)
         self.dc = Pin(dc_pin, Pin.OUT, value = 1)
@@ -75,7 +49,7 @@ class ILI9XXX_PIN_CHECKER:
         elif controller == 'ESP32-S3':
             self.INVALID_PINS = [0, 12, 26, 27, 28, 29, 30, 31, 32, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47]
         elif controller == 'RP2':
-            self.INVALID_PINS = [ 23, 24, 25, 29]
+            self.INVALID_PINS = [ 23, 25 ]
         else: #Unknown controller
             self.INVALID_PINS = []
         
@@ -262,7 +236,13 @@ class ILI9XXX_PIN_CHECKER:
             
         return controller    
 
+# Set pins here or choose one of the sets
 
-pin_checker = ILI9XXX_PIN_CHECKER(DATA_PINS, CS_PIN, DC_PIN, WR_PIN, RD_PIN, RST_PIN)
+# for ESP32 D1R32                     data_pins [D0,D1,...D7], cs, dc, wr, rd, rst
+#check = ILI9XXX_PIN_CHECKER( [12, 13, 26, 25, 17, 16, 27, 14], 32, 15,  4,  2, 33 )
 
+# for RP2                     data_pins [D0,D1,...D7], cs, dc, wr, rd, rst
+#check = ILI9XXX_PIN_CHECKER( [8, 9, 2, 3, 4, 5, 6, 7], 29, 28, 27, 26, 24 )
 
+# for Esp32-S3                     data_pins [D0,D1,...D7], cs, dc, wr, rd, rst
+check = ILI9XXX_PIN_CHECKER( [9, 8, 18, 17, 15, 16, 3, 14],  6,  7,  1,  2, 5 ) 

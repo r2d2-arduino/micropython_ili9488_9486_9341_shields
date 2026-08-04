@@ -1,5 +1,5 @@
 """
-resist_touch v 0.2.3
+resist_touch v 0.3.2
 
 Project path: https://github.com/r2d2-arduino/micropython_ili9488_9486_9341_shields
 
@@ -7,23 +7,36 @@ Author: Arthur Derkach
 """
 
 from machine import Pin, ADC
-from time import sleep_ms 
+from time import sleep_ms, sleep_us, ticks_us
 
 class ResistiveTouchScreen:
-    MIN_LEVEL   = const(100) # Minimum ADC signal level to accept the value
-    MAX_LEVEL   = const(4000) # Maximum ADC signal level to accept the value
-    NOISE_PRESS = const(400) # To avoid phantom activations
-    NOISE_LEVEL = const(100) # Acceptable level of point scatter   
+    
     NUM_SAMPLES = const(11) # Number of attempts to find the correct value
     
-    def __init__(self, yu_pin, xl_pin, yd_pin, xr_pin, rd_pin, width, height):
+    def __init__(self, yu_pin, xl_pin, yd_pin, xr_pin, rd_pin,
+                 width, height, adc_type = 0 ):
         
         # min, max, direction
-        self.X_CALIB = [374, 3900, 0]
-        self.Y_CALIB = [405, 3739, 1]       
+        #2.4 9341
+        if adc_type == 0:
+            self.X_CALIB = [534, 3693, 1]
+            self.Y_CALIB = [557, 3888, 0]
+        else: # rp2 pico
+            self.X_CALIB = [9506, 57966, 0]
+            self.Y_CALIB = [8242, 54301, 1]
         
-        self.auto_calibration = 0 # Allow to auto-calibrate        
+        #2.8 9341
+        #self.X_CALIB = [265, 3445, 3]
+        #self.Y_CALIB = [343, 3639, 0]     
         
+        #3.5 9486        
+        #self.X_CALIB = [495, 3683, 1]
+        #self.Y_CALIB = [301, 3847, 2]
+        
+        #3.5 9488
+        #self.X_CALIB = [374, 3900, 0]
+        #self.Y_CALIB = [505, 3739, 1]
+    
         self.YU = Pin(yu_pin,  Pin.OUT)  # Up Y 
         self.XL = Pin(xl_pin,  Pin.OUT)  # Left X 
         self.YD = Pin(yd_pin,  Pin.OUT)  # Down Y 
@@ -34,8 +47,28 @@ class ResistiveTouchScreen:
         self.ADC_XR = ADC(self.XR)  # Analog In for XR        
         self.ADC_YU = ADC(self.YU)  # Analog In for YU
         
-        self.ADC_XR.atten(ADC.ATTN_11DB)
-        self.ADC_YU.atten(ADC.ATTN_11DB)
+        self.adc_type = adc_type
+        self.adc_max = 4095
+    
+        self.ADC_LEVEL = [100, 4000] # Min/Max ADC signal level to accept the value
+        self.NOISE = [100, 400] # Acceptable level of point scatter AND phantom activations
+        
+        if adc_type == 1: # for rpi pico
+            self.ADC_LEVEL = [6500, 59000] # Min/Max ADC signal level to accept the value
+            self.NOISE = [2000, 8000] # Acceptable level of point scatter AND avoiding phantom activations
+            self.adc_max = 65535
+            
+        self.auto_calibration = 0 # Allow to auto-calibrate        
+        
+        if adc_type == 0: # esp32
+            self.ADC_XR.atten(ADC.ATTN_11DB)
+            self.ADC_YU.atten(ADC.ATTN_11DB)
+            # Кэшируем вызовы методов АЦП, чтобы избавиться от if в циклах
+            self._get_x_adc = self.ADC_XR.read
+            self._get_y_adc = self.ADC_YU.read
+        else: # rpi pico
+            self._get_x_adc = self.ADC_XR.read_u16
+            self._get_y_adc = self.ADC_YU.read_u16
         
         self.width  = width # < height
         self.height = height
@@ -46,7 +79,19 @@ class ResistiveTouchScreen:
         self.x_coef, self.y_coef, self.x_corr, self.y_corr, self.x_len, self.y_len = self.calc_coefs()
         
         self.prev_x = -1
-        self.prev_y = -1        
+        self.prev_y = -1
+        
+        self._sample_buf = [0] * self.NUM_SAMPLES
+        
+        self.reset_pins()
+        
+    def reset_pins(self):
+        """ Reset pins to default """
+        self.XL.init(Pin.OUT, value = 0)
+        self.XR.init(Pin.OUT, value = 0)
+        self.YU.init(Pin.OUT, value = 0)
+        self.YD.init(Pin.OUT, value = 0)
+        self.RD.init(Pin.OUT, value = 1)
         
     def calc_coefs(self):
         x_min, x_max, x_dir = self.X_CALIB
@@ -66,97 +111,81 @@ class ResistiveTouchScreen:
         y_corr = y_min / y_coef
         
         return x_coef, y_coef, x_corr, y_corr, x_len, y_len
-    
-    def reset_pins(self):
-        """ Reset pins to default """
-        self.XL.init(Pin.OUT, value = 0)
-        self.XR.init(Pin.OUT, value = 0)
-        self.YU.init(Pin.OUT, value = 0)
-        self.YD.init(Pin.OUT, value = 0)
-        self.RD.init(Pin.OUT, value = 1)
-
 
     def read_x(self):
-        """ Measuring X adc value
-        Return (int): X value 0..4095 """
-        self.YU.value(1)        
-        self.YD.value(0)
-
-        self.XL.init(Pin.IN)
-        self.XR.init(Pin.IN)
-        
-        x = self.ADC_XR.read()
-        
-        return x
-    
-    def read_y(self):
-        """ Measuring Y adc value
-        Return (int): Y value 0..4095 """
-        self.XR.value(1)        
-        self.XL.value(0)
-
+        """ Read X: Power to X-plate, read via Y-wiper """
+        self.XL.init(Pin.OUT, value=0)
+        self.XR.init(Pin.OUT, value=1)
         self.YU.init(Pin.IN)
         self.YD.init(Pin.IN)
-        
-        y = self.ADC_YU.read()
-  
-        return y
-    
-    def read_z(self):
-        """ Measuring pressure
-        Return (int): Z value 0..4095 """
-        self.XL.init(Pin.OUT, value = 0)
-        self.YD.init(Pin.OUT, value = 1)
-        self.XR.off()
+        sleep_us(5) # Wait for voltage stabilization
+        return self._get_y_adc() # Считываем YU
+
+    def read_y(self):
+        """ Read Y: Power to Y-plate, read via X-wiper """
+        self.YU.init(Pin.OUT, value=1)
+        self.YD.init(Pin.OUT, value=0)
+        self.XL.init(Pin.IN)
         self.XR.init(Pin.IN)
-        self.YU.off()
+        sleep_us(5)# Wait for voltage stabilization
+        return self._get_x_adc() # Read XR
+
+    def read_z(self):
+        self.XL.init(Pin.OUT, value=0)
+        self.YD.init(Pin.OUT, value=1)
+        self.XR.init(Pin.IN)
         self.YU.init(Pin.IN)
+        sleep_us(5) # Wait for voltage stabilization
         
-        z1 = self.ADC_XR.read()
-        z2 = self.ADC_YU.read()
-        
-        return 4095 - z2 + z1  
-    
+        z1 = self._get_x_adc()
+        z2 = self._get_y_adc()
+        # Calculate pressure using correct ADC maximum
+        return self.adc_max - z2 + z1    
+
     def read_touch(self):
         """ Read ADC values of touch. Exclude noise touches. 
         Return (int, int): X & Y adc values
         """
+        min_lvl, max_lvl = self.ADC_LEVEL
+        noise_lvl, noise_press = self.NOISE
+        adc_type = self.adc_type
+        num_samp = self.NUM_SAMPLES
+        
         z = self.read_z()
         
-        if z < NOISE_PRESS:
-            return -NOISE_PRESS, -NOISE_PRESS
-        self.reset_pins()
+        if z < noise_press:
+            return -noise_press, -noise_press
         
+        sambuf = self._sample_buf
+        readx = self.read_x
+        ready = self.read_y
         #Taking multiple measurements to choose an average X
-        x_list = []
-        x_list.append( self.read_x() )
-        for _ in range(NUM_SAMPLES - 1):
-            x_list.append( self.ADC_XR.read() )
-        x_list.sort()
-        x = x_list[NUM_SAMPLES//2 + 1]
-        self.reset_pins()
+        for i in range(num_samp):
+            sambuf[i] = readx()
+        
+        sambuf.sort()
+        x = sambuf[ num_samp // 2 ]
         
         #Taking multiple measurements to choose an average Y
-        y_list = []
-        y_list.append( self.read_y() )
-        for _ in range(NUM_SAMPLES - 1):
-            y_list.append( self.ADC_YU.read() )
-        y_list.sort()        
-        y = y_list[NUM_SAMPLES//2 + 1]
-        self.reset_pins()
+        for i in range( num_samp ):
+            sambuf[i] = ready()            
+        sambuf.sort()
+        y = sambuf[ num_samp // 2 ]
         
-        if (MIN_LEVEL < x < MAX_LEVEL) and (MIN_LEVEL < y < MAX_LEVEL):
+        self.reset_pins()
+
+        if (min_lvl < x < max_lvl) and (min_lvl < y < max_lvl):
             sum_xy = x + y
             prev_sum = self.prev_x + self.prev_y
                     
             self.prev_x, self.prev_y = x, y
             
-            if (0 <= sum_xy - prev_sum < NOISE_LEVEL) or (0 <= prev_sum - sum_xy < NOISE_LEVEL):
+            if abs(sum_xy - prev_sum) < noise_lvl:
                 if self.auto_calibration:
                     self.auto_calibrate(x, y)
                 return x, y
 
-        return -NOISE_LEVEL, -NOISE_LEVEL
+        return -noise_lvl, -noise_lvl
       
     def set_rotation(self, rotation):
         """ Set orientation for Toushscreen
@@ -174,11 +203,13 @@ class ResistiveTouchScreen:
     def read_coordinats(self):
         """ Read X and Y coordinates on screen
         Return (int, int): X & Y coordinates in pixels
-        """        
+        """
+        noise_lvl = self.NOISE[0]
+        
         x_adc, y_adc = self.read_touch()
         
         if x_adc < 0 or y_adc < 0:
-            return -NOISE_LEVEL, -NOISE_LEVEL
+            return -noise_lvl, -noise_lvl
 
         x_pix = int( x_adc / self.x_coef - self.x_corr )
         y_pix = int( y_adc / self.y_coef - self.y_corr )
@@ -226,10 +257,10 @@ class ResistiveTouchScreen:
             y_len = self.height
             
         while True:
-            #start = time.ticks_us()
+            #start = ticks_us()
             x, y = self.read_coordinats()
             if 0 <= x <= x_len and 0 <= y <= y_len:
-                #print((time.ticks_us()-start), 'us')
+                #print((ticks_us()-start), 'us')
                 #print(x, y)
                 return x, y
             sleep_ms(delay)
